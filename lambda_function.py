@@ -26,6 +26,38 @@ def build_validation_result(is_valid, violated_slot, message_content):
         "message": {"contentType": "PlainText", "content": message_content},
     }
 
+def validate_data(age, investment_amount, intent_request):
+    """
+    Validates the data provided by the user.
+    """
+    
+    # Validate that the user is over 0 years old and under 65 years old
+    if age is not None:
+        age = parse_int(age)
+        if age > 64 or age <0:
+            return build_validation_result(
+                False,
+                "age",
+                "The maximum age to contract this service is 64, "
+                "can you provide an age between 0 and 64 please?.",
+            )
+        
+ # Validate the investment amount, it should be =>5000
+    if investment_amount is not None:
+        investment_amount = parse_int(
+            investment_amount
+        )  # Since parameters are strings it's important to cast values
+        if investment_amount < 5000:
+            return build_validation_result(
+                False,
+                "investmentAmount",
+                "The minimum investment amount is $5,000 USD, "
+                "could you please provide a greater amount?",
+            )
+            
+     # A True results is returned if age or amount are valid
+    return build_validation_result(True, None, None)
+
 
 ### Dialog Actions Helper Functions ###
 def get_slots(intent_request):
@@ -98,7 +130,26 @@ def recommend_portfolio(intent_request):
         # for the first violation detected.
 
         ### YOUR DATA VALIDATION CODE STARTS HERE ###
-
+        # Gets all the slots
+        slots = get_slots(intent_request)
+        
+        # Validates user's input using the validate_data function
+        validation_result = validate_data(age, investment_amount, intent_request)
+        
+        # If the data provided by the user is not valid,
+        # the elicitSlot dialog action is used to re-prompt for the first violation detected.
+        if not validation_result["isValid"]:
+            slots[validation_result["violatedSlot"]] = None  # Cleans invalid slot
+            
+            # Returns an elicitSlot dialog to request new data for the invalid slot
+            return elicit_slot(
+                intent_request["sessionAttributes"],
+                intent_request["currentIntent"]["name"],
+                slots,
+                validation_result["violatedSlot"],
+                validation_result["message"],
+            )
+        
         ### YOUR DATA VALIDATION CODE ENDS HERE ###
 
         # Fetch current session attibutes
@@ -109,6 +160,76 @@ def recommend_portfolio(intent_request):
     # Get the initial investment recommendation
 
     ### YOUR FINAL INVESTMENT RECOMMENDATION CODE STARTS HERE ###
+    
+    if risk_level is 'Very High' :
+        return close(
+        intent_request["sessionAttributes"],
+        "Fulfilled",
+        {
+            "contentType": "PlainText",
+            "content": """{} thank you for your information;
+            based on the risk level you defined my recommendation is
+            to choose an investment portfolio with 0% bonds (AGG), 100% equities (SPY)".
+            """.format(
+                first_name),},)
+    elif risk_level is 'Very Low' :
+        return close(
+        intent_request["sessionAttributes"],
+        "Fulfilled",
+        {
+            "contentType": "PlainText",
+            "content": """{} thank you for your information;
+            based on the risk level you defined my recommendation is
+            to choose an investment portfolio with 80% bonds (AGG), 20% equities (SPY)".
+            """.format(
+                first_name),},)
+    elif risk_level is 'Low' :
+        return close(
+        intent_request["sessionAttributes"],
+        "Fulfilled",
+        {
+            "contentType": "PlainText",
+            "content": """{} thank you for your information;
+            based on the risk level you defined my recommendation is
+            to choose an investment portfolio with 60% bonds (AGG), 40% equities (SPY)".
+            """.format(
+                first_name),},)
+    
+    elif risk_level is 'Medium' :
+        return close(
+        intent_request["sessionAttributes"],
+        "Fulfilled",
+        {
+            "contentType": "PlainText",
+            "content": """{} thank you for your information;
+            based on the risk level you defined my recommendation is
+            to choose an investment portfolio with 40% bonds (AGG), 60% equities (SPY)".
+            """.format(
+                first_name),},)
+        
+    elif risk_level is 'High' :
+        return close(
+        intent_request["sessionAttributes"],
+        "Fulfilled",
+        {
+            "contentType": "PlainText",
+            "content": """{} thank you for your information;
+            based on the risk level you defined my recommendation is
+            to choose an investment portfolio with 20% bonds (AGG), 80% equities (SPY)".
+            """.format(
+                first_name),},)
+    
+    else:
+        return close(
+        intent_request["sessionAttributes"],
+        "Fulfilled",
+        {
+            "contentType": "PlainText",
+            "content": """{} thank you for your information;
+            based on the risk level you defined my recommendation is
+            to choose an investment portfolio with 100% bonds (AGG), 0% equities (SPY)".
+            """.format(
+                first_name),},)
 
     ### YOUR FINAL INVESTMENT RECOMMENDATION CODE ENDS HERE ###
 
@@ -150,3 +271,4 @@ def lambda_handler(event, context):
     """
 
     return dispatch(event)
+
