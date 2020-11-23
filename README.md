@@ -1,1 +1,3 @@
 # Chat_Bot_Simulation
+
+This is a chat bot that was created using Amazon Lex. It is a Robo Advisor that shows how a person can use an automated service to answer questions and get answers. This particular chat bot will ask for a person's name one they state they are interested in retirement. It also checks for an age range and investment minimum. Once those conditions have been met the Robo Advisor prompts the user to indicate the level of risk that they are willing to take on. The Robo Advisor will offer a suggestion on how to invest based on what the user's risk tolerance.
